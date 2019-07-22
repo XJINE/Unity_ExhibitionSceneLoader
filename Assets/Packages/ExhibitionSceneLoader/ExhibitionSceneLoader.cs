@@ -5,11 +5,11 @@ public class ExhibitionSceneLoader : SingletonMonoBehaviour<ExhibitionSceneLoade
 {
     #region Field
 
-    public string absoluteFilePath = "ExhibitionSceneLoaderSettings.txt";
-    public string sceneName = "ExhibitionSceneLoader";
+    public string settingFile = "ExhibitionSceneLoaderSettings.txt";
+    public string sceneName   = "ExhibitionSceneLoader";
 
-    public  float timeLimitSec = 30;
-    private float previousLoadTimeSec = 0;
+    public  float waitTimeSec = 30;
+    private float prevTimeSec = 0;
 
     #endregion Field
 
@@ -17,21 +17,21 @@ public class ExhibitionSceneLoader : SingletonMonoBehaviour<ExhibitionSceneLoade
 
     protected virtual void Start()
     {
-        this.sceneName = FileReadWriter.ReadTextFromFile(this.absoluteFilePath);
+            this.sceneName = FileReadWriter.ReadTextFromFile(this.settingFile) ?? this.sceneName;
     }
 
     protected virtual void Update()
     {
-        if (Time.timeSinceLevelLoad - this.previousLoadTimeSec > this.timeLimitSec)
+        if (Time.timeSinceLevelLoad - this.prevTimeSec > this.waitTimeSec)
         {
-            FileReadWriter.WriteTextToFile(this.absoluteFilePath, this.sceneName);
+            TrySaveSettings();
             TrySceneLoad();
         }
     }
 
     protected virtual void OnGUI()
     {
-        int count = (int)(this.timeLimitSec - (Time.timeSinceLevelLoad - this.previousLoadTimeSec));
+        int count = (int)(this.waitTimeSec - (Time.timeSinceLevelLoad - this.prevTimeSec));
 
         GUILayout.BeginArea(new Rect(100, 100, 300, 300));
         GUILayout.Label("This scene must be load first.");
@@ -39,6 +39,18 @@ public class ExhibitionSceneLoader : SingletonMonoBehaviour<ExhibitionSceneLoade
         this.sceneName = GUILayout.TextField(this.sceneName);
         GUILayout.Label("Scene name will be saved automatically.");
         GUILayout.EndArea();
+    }
+
+    protected virtual void TrySaveSettings()
+    {
+        try
+        {
+            FileReadWriter.WriteTextToFile(this.settingFile, this.sceneName);
+        }
+        catch
+        {
+            FileReadWriter.WriteTextToStreamingAssets(this.settingFile, this.sceneName);
+        }
     }
 
     protected virtual void TrySceneLoad()
@@ -49,7 +61,7 @@ public class ExhibitionSceneLoader : SingletonMonoBehaviour<ExhibitionSceneLoade
         }
         catch
         {
-            this.previousLoadTimeSec = Time.timeSinceLevelLoad;
+            this.prevTimeSec = Time.timeSinceLevelLoad;
         }
     }
 
