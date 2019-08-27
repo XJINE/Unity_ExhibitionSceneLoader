@@ -2,9 +2,6 @@
 
 <img src="https://github.com/XJINE/Unity_ExhibitionSceneLoader/blob/master/Screenshot.png" width="100%" height="auto" />
 
-``ColorCollection.cginc`` provides some functions for color collection.
-And there are some ImageEffects of these.
-
 ## Import to Your Project
 
 You can import this asset from UnityPackage.
@@ -20,5 +17,6 @@ You have to import following assets to use this asset.
 
 ## How to Use
 
-Set SceneName into the TextField, and it will be loaded after a few seconds.
-Settings are saved into the specified file when the scene load is started.
+1. Set ExhibitionSceneLoader into build settings and set at the 0 index. 
+2. Add your scenes into build settings.
+3. Set your setting and save file path in inspector. 
