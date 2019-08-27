@@ -6,10 +6,14 @@ public class ExhibitionSceneLoader : SingletonMonoBehaviour<ExhibitionSceneLoade
     #region Field
 
     public string settingFile = "ExhibitionSceneLoaderSettings.txt";
-    public string sceneName   = "ExhibitionSceneLoader";
+    public int    sceneIndex  = 1;
 
     public  float waitTimeSec = 30;
     private float prevTimeSec = 0;
+
+    public Rect fieldSize = new Rect(100, 100, 500, 500);
+
+    protected string[] scenes;
 
     #endregion Field
 
@@ -17,7 +21,19 @@ public class ExhibitionSceneLoader : SingletonMonoBehaviour<ExhibitionSceneLoade
 
     protected virtual void Start()
     {
-            this.sceneName = FileReadWriter.ReadTextFromFile(this.settingFile) ?? this.sceneName;
+        // NOTE:
+        // Ignore SceneLoader scene.
+
+        int sceneCount = SceneManager.sceneCountInBuildSettings;
+        this.scenes = new string[sceneCount - 1];
+
+        for (int i = 1; i < sceneCount; i++)
+        {
+            this.scenes[i - 1] = " " + SceneUtility.GetScenePathByBuildIndex(i);
+        }
+
+        string sceneIndex = FileReadWriter.ReadTextFromFile(this.settingFile) ?? "1";
+        int.TryParse(sceneIndex, out this.sceneIndex);
     }
 
     protected virtual void Update()
@@ -33,11 +49,20 @@ public class ExhibitionSceneLoader : SingletonMonoBehaviour<ExhibitionSceneLoade
     {
         int count = (int)(this.waitTimeSec - (Time.timeSinceLevelLoad - this.prevTimeSec));
 
-        GUILayout.BeginArea(new Rect(100, 100, 300, 300));
-        GUILayout.Label("This scene must be load first.");
-        GUILayout.Label("Input scene name (" + count + ") : ");
-        this.sceneName = GUILayout.TextField(this.sceneName);
-        GUILayout.Label("Scene name will be saved automatically.");
+        GUILayout.BeginArea(this.fieldSize);
+
+        GUILayout.Label("Scenes : ");
+        this.sceneIndex = GUILayout.SelectionGrid(this.sceneIndex, this.scenes, 1, GUI.skin.toggle);
+
+        GUILayout.Label("Setting file path : ");
+        GUILayout.Label(this.settingFile);
+
+        if (GUILayout.Button("Start (" + count + ")"))
+        {
+            TrySaveSettings();
+            TrySceneLoad();
+        };
+
         GUILayout.EndArea();
     }
 
@@ -45,19 +70,22 @@ public class ExhibitionSceneLoader : SingletonMonoBehaviour<ExhibitionSceneLoade
     {
         try
         {
-            FileReadWriter.WriteTextToFile(this.settingFile, this.sceneName);
+            FileReadWriter.WriteTextToFile(this.settingFile, this.sceneIndex.ToString());
         }
         catch
         {
-            FileReadWriter.WriteTextToStreamingAssets(this.settingFile, this.sceneName);
+            FileReadWriter.WriteTextToStreamingAssets(this.settingFile, this.sceneIndex.ToString());
         }
     }
 
     protected virtual void TrySceneLoad()
     {
+        // NOTE:
+        // this.sceneIndex ignores SceneLoader.
+
         try
         {
-            SceneManager.LoadScene(this.sceneName, LoadSceneMode.Single);
+            SceneManager.LoadScene(this.sceneIndex + 1, LoadSceneMode.Single);
         }
         catch
         {
