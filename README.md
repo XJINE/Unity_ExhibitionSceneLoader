@@ -2,6 +2,9 @@
 
 <img src="https://github.com/XJINE/Unity_ExhibitionSceneLoader/blob/master/Screenshot.png" width="100%" height="auto" />
 
+ExhibitionSceneLoader provides helper GUI to load the first scene.
+The selected scene will be started after a few seconds and saved int your setting file.
+
 ## Import to Your Project
 
 You can import this asset from UnityPackage.
